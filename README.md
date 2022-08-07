@@ -49,7 +49,7 @@
 ### Setup
 To get this repository, run the following command inside your git enabled terminal
 ```bash
-git clone https://github.com/AliBigdeli/Django-Smart-RFID-Control.git
+git clone https://github.com/AliBigdeli/Django-Smart-RFID-Access-Control.git
 ```
 
 #### Build everything
