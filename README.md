@@ -52,7 +52,7 @@ To get this repository, run the following command inside your git enabled termin
 git clone https://github.com/AliBigdeli/Django-Smart-RFID-Control.git
 ```
 
-#### Build everything:
+#### Build everything
 
 The first time you run this it's going to take 5-10 minutes depending on your
 internet connection speed and computer's hardware specs. That's because it's
