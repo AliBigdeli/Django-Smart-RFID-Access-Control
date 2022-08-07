@@ -1,0 +1,239 @@
+{% extends 'dashboard/base.html'%}
+
+{% block content %}
+<div class="d-flex">
+    <div>
+        <h1 class="mt-4">Devices</h1>
+    </div>
+    <div class="ms-auto mt-4">
+        <button type="button " class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#CreateFormModal"
+            id="CreateDevice">
+            Add Device
+        </button>
+    </div>
+</div>
+
+
+<hr>
+<div class="table-responsive" style="height: 100%;">
+    <table class="table">
+        <thead class="table-dark">
+
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <!-- <th scope="col">Token</th> -->
+                <th scope="col">Gateway ID</th>
+                <!-- <th scope="col">Created_date</th> -->
+                <th scope="col">Actions</th>
+            </tr>
+
+        </thead>
+        <tbody id="table-item-wrapper">
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Create Modal -->
+<div class="modal fade" id="CreateFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Create Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-form">
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Name:</label>
+                        <input type="text" class="form-control" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Gateway ID:</label>
+                        <input type="text" class="form-control" name="gateway_id">
+                    </div>
+
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning" id="SubmitButton"
+                    data-bs-dismiss="modal">Create</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="EditFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Create Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Name:</label>
+                        <input type="text" class="form-control" name="name" id="FormModalName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Gateway ID:</label>
+                        <input type="text" class="form-control" name="gateway_id" id="FormModalGatewayID">
+                    </div>
+
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning">Update</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    var host_url = location.protocol + '//' + location.host
+    var main_url = new URL(host_url + "/dashboard/api/card-reader/")
+    var general_id
+    function fetchData(url) {
+        let wrapper = $('#table-item-wrapper')
+
+        $.get(url,  // url
+            function (data, textStatus, jqXHR) {
+
+                results_data = data
+                wrapper.empty()
+                results_data.forEach(function (item, i) {
+                    // for (post of data.results) {
+                    wrapper.append(`<tr id='table-item-${item.id}'>                
+                            <td>${i += 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.gateway_id}</td>
+                            <td style="width:20%">
+                                <button class="btn btn-primary btn-xs" type="button" onclick="openEditModal(${item.id})" >Edit</button>                                
+                                <button class="btn btn-danger btn-xs" type="button" onclick="removeItem(${item.id})">Delete</button>                                
+                            </td>
+                        </tr>`)
+                }
+
+
+                )
+            })
+
+    }
+
+    $("#create-form").submit(function (e) {
+        e.preventDefault()
+        // console.log(this.job_title.value)
+        // console.log('sent')
+        formData = new FormData();
+        formData.append('name', this.name.value)
+        formData.append('gateway_id', this.gateway_id.value)
+        
+        $.ajax({
+            // contentType: "multipart/form-data",
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            url: "/dashboard/api/card-reader/",
+            success: function (data) {
+                fetchData(main_url)
+                $('#create-form').trigger("reset");                
+                $("#CreateFormModal").modal('hide');
+            },
+            failure: function (response) {
+                alert(response)
+            }
+        });
+    });
+
+
+    $("#edit-form").submit(function (e) {
+        e.preventDefault()
+        formData = new FormData();
+        formData.append('name', this.name.value)
+        formData.append('gateway_id', this.gateway_id.value)
+        let id = general_id
+        $.ajax({
+            // contentType: "multipart/form-data",
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            type: 'PATCH',
+            processData: false,
+            contentType: false,
+            data: formData,
+            url: `/dashboard/api/card-reader/${id}/`,
+            success: function (data) {
+                fetchData(main_url)
+                $('#edit-form').trigger("reset");
+                $("#EditFormModal").modal('hide');
+            },
+            failure: function (response) {
+                alert(response)
+            }
+        });
+    });
+
+    function openEditModal(id) {
+        $("#EditFormModal").modal('show');
+        general_id = id
+        modal = document.getElementById("EditFormModal")
+        let result_data
+        $.get(`/dashboard/api/card-reader/${id}/`,
+            function (data, textStatus, jqXHR) {
+                result_data = data
+                // console.log(result_data.text)
+
+            }).then(function () {        
+                $('#FormModalName').val(result_data.name)
+                $('#FormModalGatewayID').val(result_data.gateway_id)
+                
+            })
+    }
+
+    function removeItem(id) {
+        if (confirm(`Are you sure you want to remove this ${id} id?`)) {
+            $.ajax({
+                // contentType: "multipart/form-data",
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                type: 'DELETE',
+                processData: false,
+                contentType: false,
+                url: `/dashboard/api/card-reader/${id}/`,
+                success: function (data) {
+                    fetchData(main_url)
+                },
+                failure: function (response) {
+                    alert(response)
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+
+            });
+        } else {
+
+        }
+    }
+
+
+    window.addEventListener('DOMContentLoaded', event => {
+        url = main_url
+        fetchData(url)
+
+        // fetchJobTitles()
+    });
+</script>
+{% endblock extra_js %}

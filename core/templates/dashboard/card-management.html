@@ -1,0 +1,295 @@
+{% extends 'dashboard/base.html'%}
+
+{% block content %}
+<div class="d-flex">
+    <div>
+        <h1 class="mt-4">Cards</h1>
+    </div>
+    <div class="ms-auto mt-4">
+        <button type="button " class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#CreateFormModal"
+            id="CreateDevice">
+            Add Card ID
+        </button>
+    </div>
+</div>
+
+
+<hr>
+<div class="table-responsive" style="height: 100%;">
+    <table class="table">
+        <thead class="table-dark">
+
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Card ID</th>
+                <th scope="col">Gateway</th>
+                <th scope="col">Access</th>
+                <th scope="col">Actions</th>
+            </tr>
+
+        </thead>
+        <tbody id="table-item-wrapper">
+        </tbody>
+    </table>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="CreateFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Create Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-form">
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Name:</label>
+                        <input type="text" class="form-control" name="name" >
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Card ID:</label>
+                        <input type="text" class="form-control" name="card_id">
+                    </div>
+                    <div class="mb-3">
+                        <label for="GatewaySelect">Gateway</label>
+                        <select class="form-control GatewaySelect" name="gateway" >
+                            
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccessSelect">Access</label>
+                        <select class="form-control" name="access">
+                            <option value="1">Authorized</option>
+                            <option value="2">UnAuthorized</option>
+                        </select>
+                    </div>
+
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning" >Create</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="EditFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Create Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-form">
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Name:</label>
+                        <input type="text" class="form-control" name="name" id="FormModalName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Card ID:</label>
+                        <input type="text" class="form-control" name="card_id" id="FormModalCardID">
+                    </div>
+                    <div class="mb-3">
+                        <label for="GatewaySelect">Gateway</label>
+                        <select class="form-control GatewaySelect" name="gateway" id="FormModalGateway">
+                            
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccessSelect">Access</label>
+                        <select class="form-control" name="access" id="FormModalAccess">
+                            <option value="1">Authorized</option>
+                            <option value="2">UnAuthorized</option>
+                        </select>
+                    </div>
+
+
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning">Update</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+{% block extra_js %}
+<script>
+    var host_url = location.protocol + '//' + location.host
+    var main_url = new URL(host_url + "/dashboard/api/card-id/")
+    var general_id
+
+    function fetchGatewayData(){
+        let wrapper = $('.GatewaySelect')
+        $.get("/dashboard/api/card-reader/",  // url
+            function (data, textStatus, jqXHR) {
+
+                results_data = data
+                wrapper.empty()
+                results_data.forEach(function (item, i) {
+                    // for (post of data.results) {
+                    wrapper.append(`<option value="${item.id}" >${item.name}</option>`)
+                }
+
+
+                )
+            })
+    }
+
+    function fetchData(url) {
+        let wrapper = $('#table-item-wrapper')
+
+        $.get(url,  // url
+            function (data, textStatus, jqXHR) {
+
+                results_data = data
+                wrapper.empty()
+                results_data.forEach(function (item, i) {
+                    // for (post of data.results) {
+                    wrapper.append(`<tr id='table-item-${item.id}'>                
+                            <td>${i += 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.card_id}</td>
+                            <td>${item.gateway.name}</td>
+                            <td>${item.access.name}</td>
+                            <td style="width:20%">
+                                <button class="btn btn-primary btn-xs" type="button" onclick="openEditModal(${item.id})" >Edit</button>                                
+                                <button class="btn btn-danger btn-xs" type="button" onclick="removeItem(${item.id})">Delete</button>                                
+                            </td>
+                        </tr>`)
+                }
+
+
+                )
+            })
+
+    }
+
+    $("#create-form").submit(function (e) {
+        e.preventDefault()
+        // console.log(this.job_title.value)
+        // console.log('sent')
+        formData = new FormData();
+        formData.append('name', this.name.value)
+        formData.append('gateway', this.gateway.value)
+        formData.append('card_id', this.card_id.value)
+        formData.append('access', this.access.value)
+
+        $.ajax({
+            // contentType: "multipart/form-data",
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            url: "/dashboard/api/card-id/",
+            success: function (data) {
+                fetchData(main_url)
+                $('#create-form').trigger("reset");
+                $("#CreateFormModal").modal('hide');
+            },
+            failure: function (response) {
+                alert(response)
+            }
+        });
+    });
+
+
+    $("#edit-form").submit(function (e) {
+        e.preventDefault()
+        formData = new FormData();
+        formData.append('name', this.name.value)
+        formData.append('gateway', this.gateway.value)
+        formData.append('card_id', this.card_id.value)
+        formData.append('access', this.access.value)
+        let id = general_id
+        $.ajax({
+            // contentType: "multipart/form-data",
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+            type: 'PATCH',
+            processData: false,
+            contentType: false,
+            data: formData,
+            url: `/dashboard/api/card-id/${id}/`,
+            success: function (data) {
+                fetchData(main_url)
+                $('#edit-form').trigger("reset");
+                $("#EditFormModal").modal('hide');
+            },
+            failure: function (response) {
+                alert(response)
+            }
+        });
+    });
+
+    function openEditModal(id) {
+        $("#EditFormModal").modal('show');
+        general_id = id
+        modal = document.getElementById("EditFormModal")
+        let result_data
+        $.get(`/dashboard/api/card-id/${id}/`,
+            function (data, textStatus, jqXHR) {
+                result_data = data
+                // console.log(result_data.text)
+
+            }).then(function () {
+                console.log(result_data)
+                $('#FormModalName').val(result_data.name)
+                $('#FormModalCardID').val(result_data.card_id)
+                $('#FormModalGateway').val(result_data.gateway.id)
+                $('#FormModalAccess').val(result_data.access.id)
+
+            })
+    }
+
+    function removeItem(id) {
+        if (confirm(`Are you sure you want to remove this ${id} id?`)) {
+            $.ajax({
+                // contentType: "multipart/form-data",
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                type: 'DELETE',
+                processData: false,
+                contentType: false,
+                url: `/dashboard/api/card-id/${id}/`,
+                success: function (data) {
+                    fetchData(main_url)
+                },
+                failure: function (response) {
+                    alert(response)
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+
+            });
+        } else {
+
+        }
+    }
+
+
+    window.addEventListener('DOMContentLoaded', event => {
+        url = main_url
+        fetchData(url)
+        fetchGatewayData()
+
+        // fetchJobTitles()
+    });
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,73 @@
+{% extends 'dashboard/base.html'%}
+
+{% block content %}
+<div class="d-flex">
+	<div>
+		<h1 class="mt-4">Logs</h1>
+	</div>
+
+</div>
+
+
+<hr>
+<div class="table-responsive" style="height: 100%;">
+	<table class="table">
+		<thead class="table-dark">
+
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Card</th>
+				<!-- <th scope="col">Token</th> -->
+				<th scope="col">Reader</th>
+				<th scope="col">Owner</th>
+				<th scope="col">DateTime</th>
+			</tr>
+
+		</thead>
+		<tbody id="table-item-wrapper">
+		</tbody>
+	</table>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+
+<script>
+	var host_url = location.protocol + '//' + location.host
+	var main_url = new URL(host_url + "/dashboard/api/card-gateway/log/")
+	var general_id
+	function fetchData(url) {
+		let wrapper = $('#table-item-wrapper')
+
+		$.get(url,  // url
+			function (data, textStatus, jqXHR) {
+
+				results_data = data.results
+				wrapper.empty()
+				results_data.forEach(function (item, i) {
+					// for (post of data.results) {
+					wrapper.append(`<tr id='table-item-${item.id}'>                
+                            <td>${i += 1}</td>
+                            <td>${item.card}</td>
+                            <td>${item.gateway.name}</td>
+							<td>${item.owner}</td>         
+							<td>${item.created_date}</td>                     
+                        </tr>`)
+				}
+
+
+				)
+			})
+
+	}
+	window.addEventListener('DOMContentLoaded', event => {
+		fetchData(main_url)
+
+		// fetchJobTitles()
+	});
+
+	setInterval(function () {
+		fetchData(main_url)
+	}, 5000);
+</script>
+{% endblock %}
