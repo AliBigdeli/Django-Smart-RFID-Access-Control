@@ -26,9 +26,10 @@
 - [Bugs or Opinion](#bugs-or-opinion)
 
 
+
 ### demo
 <p align="center">
-<img src="" width="500"/>
+<img src="https://user-images.githubusercontent.com/29748439/183278025-57a3ad05-bf00-4bec-b609-d7ce38db358c.gif" width="720"/>
 </p>
 
 ### Features
@@ -88,7 +89,7 @@ black -l 79 . && flake8
 ### Database schema
 A simple view of the project model schema.
 <p align="center">
-<img src="" alt="database schema" width="600"/>
+<img src="https://user-images.githubusercontent.com/29748439/183278042-76140039-107e-4a54-9260-150fc3c812ab.png" alt="database schema" width="600"/>
 </p>
 
 
