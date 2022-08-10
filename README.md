@@ -29,7 +29,7 @@
 
 ### demo
 <p align="center">
-<img src="https://user-images.githubusercontent.com/29748439/183278025-57a3ad05-bf00-4bec-b609-d7ce38db358c.gif" width="720"/>
+<img src="https://user-images.githubusercontent.com/29748439/183278025-57a3ad05-bf00-4bec-b609-d7ce38db358c.gif" style="max-width:720px"/>
 </p>
 
 ### Features
